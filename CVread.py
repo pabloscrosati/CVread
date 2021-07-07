@@ -30,7 +30,7 @@ class exp_details:
         self.upper_range = upper_range
 
 # Command line option parsing
-def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, override_flag=False):
+def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, override_flag=False, ref_electrode=None):
     # Check if arguments were provided
     argv = sys.argv[1:]
     if len(argv) < 1:
@@ -49,6 +49,7 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
                                                 'messages', action='store_true')
     parser.add_argument('--split', help='create new folder for each input file', action='store_true')
     parser.add_argument('--override', help='override files and folders if they are already present', action='store_true')
+    parser.add_argument('-r', '--reference', help='specify a reference voltage (V) vs. 0V SHE for correction', dest='ref_electrode')
     args = parser.parse_args()
 
     # Check if files were provided and set list variable
@@ -75,8 +76,12 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
     if args.override:
         override_flag = True
 
+    # Record the reference potential for correction if supplied
+    if args.ref_electrode is not None:
+        ref_electrode = float(args.ref_electrode)
+
     # Return arguments
-    return input_files, verbose_flag, details_flag, split_flag, override_flag
+    return input_files, verbose_flag, details_flag, split_flag, override_flag, ref_electrode
 
 # Logic for reading COR files
 def read_COR(file_name):
@@ -145,6 +150,7 @@ if __name__ == '__main__':
     details_flag = cmd_options[2]
     split_flag = cmd_options[3]
     override_flag = cmd_options[4]
+    ref_electrode = cmd_options[5]
 
     invalid_index = []
 
@@ -216,6 +222,9 @@ if __name__ == '__main__':
             current_i.append(float(data_file[q].strip().split()[1]))
             time_t.append(float(data_file[q].strip().split()[2]))
 
+        if ref_electrode is not None:
+            potential_e = [x + ref_electrode for x in potential_e]
+
         scan_index = scan_logic(potential_e)
 
         if split_flag == True:
@@ -242,23 +251,23 @@ if __name__ == '__main__':
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k+1)))
                         data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
                         if k == (len(scan_index) -1):
-                            data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                              + str(format(time_t[x], '.3f')) + ',' \
                                              + str(format(time_t[x] - time_t[int(scan_index[k])] if x >= int(scan_index[0]) \
                                            else time_t[x] - time_t[0], '.3f')))
                         else:
                             k += 1
-                            data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k-1])] if x >= int(scan_index[0]) \
                                                           else time_t[x] - time_t[0], '.3f')))
                     elif x < int(scan_index[k]):
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k-1])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
                     elif x > int(scan_index[k]):
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
@@ -297,23 +306,23 @@ if __name__ == '__main__':
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k+1)))
                         data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
                         if k == (len(scan_index) -1):
-                            data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                              + str(format(time_t[x], '.3f')) + ',' \
                                              + str(format(time_t[x] - time_t[int(scan_index[k])] if x >= int(scan_index[0]) \
                                            else time_t[x] - time_t[0], '.3f')))
                         else:
                             k += 1
-                            data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k-1])] if x >= int(scan_index[0]) \
                                                           else time_t[x] - time_t[0], '.3f')))
                     elif x < int(scan_index[k]):
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k-1])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
                     elif x > int(scan_index[k]):
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
@@ -343,24 +352,24 @@ if __name__ == '__main__':
                     write_out(data_list, os.path.join(i.split('.')[0] + '_%s.csv' % str(k + 1)))
                     data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
                     if k == (len(scan_index) - 1):
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(format(time_t[x] - time_t[int(scan_index[k])] if x >= int(scan_index[0]) \
                                                           else time_t[x] - time_t[0], '.3f')))
                     else:
                         k += 1
-                        data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                          + str(format(time_t[x], '.3f')) + ',' \
                                          + str(
                             format(time_t[x] - time_t[int(scan_index[k - 1])] if x >= int(scan_index[0]) \
                                        else time_t[x] - time_t[0], '.3f')))
                 elif x < int(scan_index[k]):
-                    data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                    data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                      + str(format(time_t[x], '.3f')) + ',' \
                                      + str(format(time_t[x] - time_t[int(scan_index[k - 1])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
                 elif x > int(scan_index[k]):
-                    data_list.append(str(potential_e[x]) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                    data_list.append(str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
                                      + str(format(time_t[x], '.3f')) + ',' \
                                      + str(format(time_t[x] - time_t[int(scan_index[k])] if x > int(scan_index[0]) \
                                                       else time_t[x] - time_t[0], '.3f')))
