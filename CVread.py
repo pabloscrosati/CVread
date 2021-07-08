@@ -1,10 +1,10 @@
 __program__ = 'Scribner CView Data Reader'
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Pablo Scrosati'
 __features__ = '* Read multiple COR CV data files and export individual cyclic scans\n' \
-               + '* Output experiment parameters'
+               + '* Output experiment parameters\n* Reference electrode correction'
 __description__ = 'Read and interpret COR data files for further data analysis.\n' \
-                  + 'Current Features:\n' + __features__
+                  + 'Features:\n' + __features__
 
 print(__program__ + ' v' + __version__ + '\nWritten by: ' + __author__ + '\n')
 
@@ -30,7 +30,7 @@ class exp_details:
         self.upper_range = upper_range
 
 # Command line option parsing
-def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, override_flag=False, ref_electrode=None):
+def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, override_flag=False, ref_electrode=None, input_files=[]):
     # Check if arguments were provided
     argv = sys.argv[1:]
     if len(argv) < 1:
@@ -44,21 +44,42 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
                                                               'option.', formatter_class=RawTextHelpFormatter)
     # Files argument is stored as a list
     parser.add_argument('-f', '--files', metavar='xxx.cor', dest='input_file', help='specify input file(s)', nargs='+')
+    parser.add_argument('-l', '--list', help='use a text list containing input file names', dest='list_file',
+                        metavar='xxx.txt', nargs='+')
     parser.add_argument('--details', help='store additional experimental details to file', action='store_true')
     parser.add_argument('-v', '--verbose', help='print additional details while running, including additional error '
                                                 'messages', action='store_true')
     parser.add_argument('--split', help='create new folder for each input file', action='store_true')
     parser.add_argument('--override', help='override files and folders if they are already present', action='store_true')
-    parser.add_argument('-r', '--reference', help='specify a reference voltage (V) vs. 0V SHE for correction', dest='ref_electrode')
+    parser.add_argument('-r', '--reference', help='specify a reference voltage (V) vs. 0 V SHE for correction',
+                        dest='ref_electrode', metavar='0.000')
     args = parser.parse_args()
 
     # Check if files were provided and set list variable
-    if args.input_file is None:
-        print('No input files specified. This program requires at least 1 COR file. Exiting.')
+    if args.input_file is None and args.list_file is None:
+        print('No input files specified. This program requires at least 1 input data file. Exiting.')
         print('Use option "-h" for help.')
         sys.exit(2)
+    elif args.input_file is not None and args.list_file is None:
+        input_files.extend(args.input_file)
+    elif args.input_file is None and args.list_file is not None:
+        for k in range(len(args.list_file)):
+            if not os.path.isfile(args.list_file[k]):
+                print('One or more list files were not found. Exiting.')
+                sys.exit(2)
+            else:
+                input_files.extend(read_file(args.list_file[k]))
     else:
-        input_files = args.input_file
+        input_files.extend(args.input_file)
+        for k in range(len(args.list_file)):
+            if not os.path.isfile(args.list_file[k]):
+                print('One or more list files were not found. Exiting.')
+                sys.exit(2)
+            else:
+                input_files.extend(read_file(args.list_file[k]))
+
+    # Remove duplicated to speed up process
+    input_files = set(input_files)
 
     # Set verbose flag if specified
     if args.verbose:
@@ -84,7 +105,7 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
     return input_files, verbose_flag, details_flag, split_flag, override_flag, ref_electrode
 
 # Logic for reading COR files
-def read_COR(file_name):
+def read_file(file_name):
     with open(file_name) as f:
         data = [line.rstrip() for line in f]
     return data
@@ -180,7 +201,7 @@ if __name__ == '__main__':
         scan_index = []
         comment_str, scan_range = '', []
         potential_e, current_i, time_t = [], [], []
-        data_file = read_COR(i)
+        data_file = read_file(i)
 
         # Read experiment details and save to object if details requested
         if details_flag == True:
