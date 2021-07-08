@@ -1,5 +1,5 @@
 __program__ = 'Scribner CView Data Reader'
-__version__ = '1.1'
+__version__ = '1.1.1'
 __author__ = 'Pablo Scrosati'
 __features__ = '* Read multiple COR CV data files and export individual cyclic scans\n' \
                + '* Output experiment parameters\n* Reference electrode correction'
@@ -78,6 +78,8 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
             else:
                 input_files.extend(read_file(args.list_file[k]))
 
+    # Clean blank space from input list
+    input_files = filter(None, input_files)
     # Remove duplicated to speed up process
     input_files = set(input_files)
 
@@ -397,6 +399,6 @@ if __name__ == '__main__':
                 if x == (len(potential_e) - 1):
                     write_out(data_list, os.path.join(i.split('.')[0] + '_%s.csv' % str(k + 2)))
             if verbose_flag == True:
-                print('%s data files written.' % exp_info.scan_number)
+                print('%s data files written.' % (len(scan_index) + 1))
 
     print('\nProgram process has reached the end.')
