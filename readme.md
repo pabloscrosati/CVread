@@ -1,4 +1,4 @@
-#Reader for Scribner CV Data Files
+# Reader for Scribner CV Data Files
 
 **Version 1.1.2, Written by: Pablo Scrosati**
 
@@ -24,21 +24,21 @@ optional arguments:
 
 `-r 0.000, --reference 0.000` specify a reference voltage (V) vs. 0 V SHE for correction
 
-##Current Functionality
+## Current Functionality
 
 * Read COR data files
 * Extract comments and CV data from COR data file
 * Split multiple scans contained within one COR data file
 * Apply reference electrode correction to data
 
-##To Do
+## To Do
 
 * Interactive mode
     * Live modification and correction of data extracted from COR data files
 * Baseline subtraction/fitting
     * Include option for subtracting baseline from baseline data or generate a fitted baseline
 
-##Changelog
+## Changelog
 
 **Version 1.1 | July 18, 2021**
 * Release update
