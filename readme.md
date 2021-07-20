@@ -2,7 +2,7 @@
 
 **Version 1.1.2, Written by: Pablo Scrosati**
 
-For program usage, use: `python CVread.py -h` or see below:
+For program usage, use: `CVread.py -h` or see below:
 
 usage: `CVread.py [-h] [-f xxx.cor [xxx.cor ...]] [-l xxx.txt [xxx.txt ...]] [--details] [-v] [--split] [--override] [-r 0.000]`
 
