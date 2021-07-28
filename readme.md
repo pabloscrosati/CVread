@@ -42,7 +42,7 @@ optional arguments:
 
 ## Changelog
 
-**Version 1.2 | July 28, 2021**
+**Version 1.2.1 | July 28, 2021**
 * Fixed a bug that caused the program to fail if the data file contained only a single run
 * Fixed a bug that generated incorrect exported data
 
