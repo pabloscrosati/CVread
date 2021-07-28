@@ -1,5 +1,5 @@
 __program__ = 'Scribner CView Data Reader'
-__version__ = '1.1.3'
+__version__ = '1.2'
 __author__ = 'Pablo Scrosati'
 __features__ = '* Read multiple COR CV data files and export individual cyclic scans\n' \
                + '* Output experiment parameters\n* Reference electrode correction'
@@ -134,9 +134,9 @@ def scan_logic(potential_list):
         if i == 0:
             continue
         elif scandown == True:
-            if potential_list[i] < potential_list[i-1] and cycle_flag < 1:
+            if potential_list[i] < potential_list[i-1] and cycle_flag != 1:
                 continue
-            elif potential_list[i] > potential_list[i-1] and cycle_flag < 1:
+            elif potential_list[i] > potential_list[i-1] and cycle_flag != 1:
                 cycle_flag += 1
                 continue
             elif potential_list[i] > potential_list[i-1] and cycle_flag == 1:
@@ -146,18 +146,18 @@ def scan_logic(potential_list):
                 cycle_flag = 0
                 continue
         elif scanup == True:
-            if potential_list[i] > potential_list[i-1] and cycle_flag < 1:
+            if potential_list[i] > potential_list[i-1] and cycle_flag != 1:
                 continue
-            elif potential_list[i] < potential_list[i-1] and cycle_flag < 1:
+            elif potential_list[i] < potential_list[i-1] and cycle_flag != 1:
                 cycle_flag += 1
                 continue
             elif potential_list[i] < potential_list[i-1] and cycle_flag == 1:
                 continue
             elif potential_list[i] > potential_list[i-1] and cycle_flag == 1:
-                indecies.extend(str(i-1))
+                indecies.append(str(i-1))
                 cycle_flag = 0
                 continue
-
+    print(indecies)
     return indecies
 
 def write_out(list_file, file_name):
@@ -245,9 +245,11 @@ if __name__ == '__main__':
             current_i.append(float(data_file[q].strip().split()[1]))
             time_t.append(float(data_file[q].strip().split()[2]))
 
+        # Reference electrode correction
         if ref_electrode is not None:
             potential_e = [x + ref_electrode for x in potential_e]
 
+        # Logic to detect scans
         scan_index = scan_logic(potential_e)
 
         if split_flag == True:
@@ -270,6 +272,16 @@ if __name__ == '__main__':
                 # Logic for splitting replicate runs and formatting
                 data_list, k = ['E (V),I (A/cm2),t (sec),t_norm (sec)'], 0
                 for x in range(len(potential_e)):
+                    if len(scan_index) == 0:
+                        data_list.append(
+                            str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            + str(format(time_t[x], '.3f')) + ',' \
+                            + str(format(time_t[x] - time_t[0], '.3f')))
+                        if x == len(potential_e) - 1:
+                            write_out(data_list,
+                                      os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k + 1)))
+                            break
+                        continue
                     if x == int(scan_index[k]):
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k+1)))
                         data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
@@ -297,7 +309,7 @@ if __name__ == '__main__':
                     if x == (len(potential_e) - 1):
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k + 2)))
                 if verbose_flag == True:
-                    print('%s data files written.' % exp_info.scan_number)
+                    print('%s data file(s) written.' % (len(scan_index) + 1))
 
             elif os.path.isdir(i.split('.')[0]) and override_flag == False:
                 print(i.split('.')[0], 'already exists!')
@@ -325,6 +337,16 @@ if __name__ == '__main__':
                 # Logic for splitting replicate runs and formatting
                 data_list, k = ['E (V),I (A/cm2),t (sec),t_norm (sec)'], 0
                 for x in range(len(potential_e)):
+                    if len(scan_index) == 0:
+                        data_list.append(
+                            str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                            + str(format(time_t[x], '.3f')) + ',' \
+                            + str(format(time_t[x] - time_t[0], '.3f')))
+                        if x == len(potential_e) - 1:
+                            write_out(data_list,
+                                      os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k + 1)))
+                            break
+                        continue
                     if x == int(scan_index[k]):
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k+1)))
                         data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
@@ -352,7 +374,7 @@ if __name__ == '__main__':
                     if x == (len(potential_e) - 1):
                         write_out(data_list, os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k + 2)))
                 if verbose_flag == True:
-                    print('%s data files written.' % exp_info.scan_number)
+                    print('%s data file(s) written.' % (len(scan_index) + 1))
 
         else:
             if details_flag == True:
@@ -371,6 +393,16 @@ if __name__ == '__main__':
             # Logic for splitting replicate runs and formatting
             data_list, k = ['E (V),I (A/cm2),t (sec),t_norm (sec)'], 0
             for x in range(len(potential_e)):
+                if len(scan_index) == 0:
+                    data_list.append(
+                        str(format(potential_e[x], '.7f')) + ',' + str(format(current_i[x], '.12f')) + ',' \
+                        + str(format(time_t[x], '.3f')) + ',' \
+                        + str(format(time_t[x] - time_t[0], '.3f')))
+                    if x == len(potential_e) - 1:
+                        write_out(data_list,
+                                  os.path.join(i.split('.')[0], i.split('.')[0] + '_%s.csv' % str(k + 1)))
+                        break
+                    continue
                 if x == int(scan_index[k]):
                     write_out(data_list, os.path.join(i.split('.')[0] + '_%s.csv' % str(k + 1)))
                     data_list = ['E (V),I (A/cm2),t (sec),t_norm (sec)']
@@ -399,6 +431,6 @@ if __name__ == '__main__':
                 if x == (len(potential_e) - 1):
                     write_out(data_list, os.path.join(i.split('.')[0] + '_%s.csv' % str(k + 2)))
             if verbose_flag == True:
-                print('%s data files written.' % (len(scan_index) + 1))
+                print('%s data file(s) written.' % (len(scan_index) + 1))
 
     print('\nProgram process has reached the end.')

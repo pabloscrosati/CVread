@@ -1,6 +1,6 @@
 # Reader for Scribner CV Data Files
 
-**Version 1.1.3, Written by: Pablo Scrosati**
+**Version 1.2, Written by: Pablo Scrosati**
 
 For program usage, use: `CVread.py -h` or see below:
 
@@ -37,11 +37,17 @@ optional arguments:
     * Live modification and correction of data extracted from COR data files
 * Baseline subtraction/fitting
     * Include option for subtracting baseline from baseline data or generate a fitted baseline
+    * NEW: Under development
+* NEW: Merge scan detection logic into single function
 
 ## Changelog
 
+**Version 1.2 | July 28, 2021**
+* Fixed a bug that caused the program to fail if the data file contained only a single run
+* Fixed a bug that generated incorrect exported data
+
 **Version 1.1.3 | July 27, 2021**
-* Maintenance Update
+* Maintenance update
 
 **Version 1.1 | July 18, 2021**
 * Release update
