@@ -1,6 +1,6 @@
 # Reader for Scribner CV Data Files
 
-**Version 1.1.2, Written by: Pablo Scrosati**
+**Version 1.1.3, Written by: Pablo Scrosati**
 
 For program usage, use: `CVread.py -h` or see below:
 
@@ -39,6 +39,9 @@ optional arguments:
     * Include option for subtracting baseline from baseline data or generate a fitted baseline
 
 ## Changelog
+
+**Version 1.1.3 | July 27, 2021**
+* Maintenance Update
 
 **Version 1.1 | July 18, 2021**
 * Release update

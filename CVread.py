@@ -1,5 +1,5 @@
 __program__ = 'Scribner CView Data Reader'
-__version__ = '1.1.2'
+__version__ = '1.1.3'
 __author__ = 'Pablo Scrosati'
 __features__ = '* Read multiple COR CV data files and export individual cyclic scans\n' \
                + '* Output experiment parameters\n* Reference electrode correction'
