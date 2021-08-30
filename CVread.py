@@ -1,5 +1,5 @@
 __program__ = 'Scribner CView Data Reader'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __author__ = 'Pablo Scrosati'
 __features__ = '* Read multiple COR CV data files and export individual cyclic scans\n' \
                + '* Output experiment parameters\n* Reference electrode correction'
@@ -53,6 +53,7 @@ def cmd_parse(desc, verbose_flag=False, details_flag=False, split_flag=False, ov
     parser.add_argument('--override', help='override files and folders if they are already present', action='store_true')
     parser.add_argument('-r', '--reference', help='specify a reference voltage (V) vs. 0 V SHE for correction',
                         dest='ref_electrode', metavar='0.000')
+    #parser.add_argument('--baseline')
     args = parser.parse_args()
 
     # Check if files were provided and set list variable
